@@ -1,0 +1,50 @@
+{
+    "meta": {
+        "type": "meta",
+        "name": "Expert Profile" 
+    },
+    "name":{
+        "type":"string",
+        "id":"0",
+        "priority":"0"
+    },
+    "age":{
+        "type": "integer",
+        "id" :"1",
+        "priority":"1",
+        "options" :{
+            "0" : "18<25",
+            "1" : "25<35",
+            "2" : "35<45",
+            "3" : "45<60",
+            "4" : ">60"
+        }
+        
+    },
+    "sex" :{
+        "type":"integer",
+        "id" : "2",
+        "priority" : "2",
+        "options" :{
+            "0" : "Male",
+            "1" : "Female"
+        }
+    },
+    "skills" : {
+        "type" : "string",
+        "id" : "3",
+        "priority" : "3"
+    },
+    "overall_expertise":{
+        "type" : "integer",
+        "id" : "4",
+        "priority" : "4",
+        "options" : {
+            "0" : "Novice",
+            "1" : "Master",
+            "2" : "Expert",
+            "3" : "Doctor"
+        }
+    }
+    
+}

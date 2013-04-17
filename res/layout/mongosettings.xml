@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <!-- <TableLayout -->
+    <!-- android:layout_width="fill_parent" -->
+    <!-- android:layout_height="fill_parent" -->
+    <!-- android:stretchColumns="1" > -->
+
+
+    <!-- <TableRow> -->
+
+
+    <!-- <TextView -->
+    <!-- android:id="@+id/mongoNameLabel" -->
+    <!-- android:layout_width="match_parent" -->
+    <!-- android:layout_height="wrap_content" -->
+    <!-- android:text="Name" > -->
+    <!-- </TextView> -->
+
+
+    <!-- <EditText -->
+    <!-- android:id="@+id/mongoName" -->
+    <!-- android:layout_width="match_parent" -->
+    <!-- android:layout_height="wrap_content" /> -->
+    <!-- </TableRow> -->
+
+
+    <!-- <TextView -->
+    <!-- android:id="@+id/mongoAgeLabel" -->
+    <!-- android:layout_width="match_parent" -->
+    <!-- android:layout_height="wrap_content" -->
+    <!-- android:text="Age" > -->
+    <!-- </TextView> -->
+
+
+    <!-- <EditText -->
+    <!-- android:id="@+id/mongoAge" -->
+    <!-- android:layout_width="match_parent" -->
+    <!-- android:layout_height="wrap_content" /> -->
+
+
+    <!-- <TableRow> -->
+    <!-- </TableRow> -->
+
+
+    <!-- <TableRow> -->
+    <!-- </TableRow> -->
+    <!-- </TableLayout> -->
+
+    <RadioGroup
+        android:id="@+id/radioGroup1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/spinner1"
+        android:layout_alignTop="@+id/mongoSexLabel"
+        android:layout_marginLeft="22dp" >
+    </RadioGroup>
+
+    <Spinner
+        android:id="@+id/mongoAge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/mongoName"
+        android:layout_marginTop="58dp"
+        android:layout_toRightOf="@+id/radioM"
+        android:entries="@array/string_array_name" />
+
+    <TextView
+        android:id="@+id/TextView01"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/mongoAge"
+        android:layout_marginTop="16dp"
+        android:layout_toRightOf="@+id/mongoSexLabel"
+        android:text="Age"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/mongoSexLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/radioGroup1"
+        android:layout_below="@+id/mongoAge"
+        android:text="Sex"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <RadioButton
+        android:id="@+id/radioM"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/mongoSexLabel"
+        android:layout_alignBottom="@+id/mongoSexLabel"
+        android:layout_toRightOf="@+id/TextView01"
+        android:checked="true"
+        android:text="Male" />
+
+    <RadioButton
+        android:id="@+id/radioF"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/radioM"
+        android:layout_alignBottom="@+id/radioM"
+        android:layout_alignLeft="@+id/mongoAge"
+        android:layout_marginLeft="30dp"
+        android:text="Female" />
+
+    <TextView
+        android:id="@+id/mongoName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/radioM"
+        android:layout_marginTop="15dp"
+        android:ems="10"
+        android:text="Hi" />
+
+</RelativeLayout>

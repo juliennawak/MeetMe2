@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry kind="lib" path="/Users/jlesbegu/Documents/PERSO/ANDROID/android-sdk-macosx/extras/android/support/v4/android-support-v4.jar"/>
+	<classpathentry kind="lib" path="/Users/jlesbegu/Documents/PERSO/ANDROID/android-sdk-macosx/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar"/>
+	<classpathentry kind="lib" path="/Users/jlesbegu/Documents/PERSO/code/MeetMe2/libs/signpost-commonshttp4-1.2.1.2.jar"/>
+	<classpathentry kind="lib" path="/Users/jlesbegu/Documents/PERSO/code/MeetMe2/libs/signpost-core-1.2.1.2.jar"/>
+	<classpathentry kind="lib" path="/Users/jlesbegu/Documents/PERSO/code/MeetMe2/libs/signpost-jetty6-1.2.1.2.jar"/>
+	<classpathentry kind="lib" path="/Users/jlesbegu/Documents/PERSO/code/MeetMe2/libs/twitter4j-async-3.0.3.jar"/>
+	<classpathentry kind="lib" path="/Users/jlesbegu/Documents/PERSO/code/MeetMe2/libs/twitter4j-core-3.0.3.jar"/>
+	<classpathentry kind="lib" path="/Users/jlesbegu/Documents/PERSO/code/MeetMe2/libs/twitter4j-examples-3.0.3.jar"/>
+	<classpathentry kind="lib" path="/Users/jlesbegu/Documents/PERSO/code/MeetMe2/libs/twitter4j-media-support-3.0.3.jar"/>
+	<classpathentry kind="lib" path="/Users/jlesbegu/Documents/PERSO/code/MeetMe2/libs/twitter4j-stream-3.0.3.jar"/>
+	<classpathentry kind="lib" path="/Users/jlesbegu/Documents/PERSO/code/MeetMe2/libs/mongo-2.10.1.jar"/>
+	<classpathentry kind="src" path="gen"/>
+	<classpathentry kind="lib" path="/Users/jlesbegu/Documents/PERSO/code/MeetMe2/libs/android-form-generator-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="output" path="bin/classes"/>
+</classpath>

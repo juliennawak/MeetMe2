@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">MeetMe</string>
+	<string name="hello_world">MeetMap</string>
+	<string name="connection">Connection</string>
+	<string name="unconnection">Unconn.</string>
+	<string name="login">Login</string>
+	<string name="password">Password</string>
+	<string name="token">55549634-SrTDIJ08gNqmDwsyjUPPVWOMVfWET5Ofa04goKmeo</string>
+	<string name="secret">FhjDJhB94LQzZq6nNl95oHAmrlWhs46lqbgIKopLQ</string>    
+</resources>
