@@ -22,13 +22,6 @@ import com.google.android.maps.OverlayItem;
 public class MyOverlays extends ItemizedOverlay<OverlayItem> {
 
 
-
-
-
-
-
-
-
 	private List<OverlayItem> overlays;
 
 
@@ -51,11 +44,11 @@ public class MyOverlays extends ItemizedOverlay<OverlayItem> {
 
 
 	public void addOverlay(OverlayItem overlay) {
-		if(getOverlays().size()==0){
+		//if(getOverlays().size()==0){
 			getOverlays().add(overlay);
-		}else{
-			getOverlays().set(0, overlay);
-		}
+		//}else{
+		//	getOverlays().set(0, overlay);
+		//}
 		populate();
 
 		this.previousoverlay = overlay;
@@ -64,10 +57,10 @@ public class MyOverlays extends ItemizedOverlay<OverlayItem> {
 	protected boolean onTap(int index) {
 		OverlayItem overlayItem = getOverlays().get(index);
 		Builder builder = new AlertDialog.Builder(context);
-		builder.setMessage("This is you runnnig at "+overlayItem.getTitle()+"km/h ? or m/h I don't know");
+		builder.setMessage(""+overlayItem.getTitle());
 		builder.setCancelable(true);
-		builder.setPositiveButton("I agree", new OkOnClickListener());
-		builder.setNegativeButton("No, no", new CancelOnClickListener());
+		builder.setPositiveButton("meet", new OkOnClickListener());
+		builder.setNegativeButton("cancel", new CancelOnClickListener());
 		AlertDialog dialog = builder.create();
 		dialog.show();
 		return true;
@@ -76,15 +69,15 @@ public class MyOverlays extends ItemizedOverlay<OverlayItem> {
 	private final class CancelOnClickListener implements
 	DialogInterface.OnClickListener {
 		public void onClick(DialogInterface dialog, int which) {
-			Toast.makeText(context, "You clicked Cancel", Toast.LENGTH_LONG)
-			.show();
+//			Toast.makeText(context, "", Toast.LENGTH_LONG)
+//			.show();
 		}
 	}
 
 	private final class OkOnClickListener implements
 	DialogInterface.OnClickListener {
 		public void onClick(DialogInterface dialog, int which) {
-			Toast.makeText(context, "You clicked OK", Toast.LENGTH_LONG).show();
+			Toast.makeText(context, "sending request ...", Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -99,7 +92,7 @@ public class MyOverlays extends ItemizedOverlay<OverlayItem> {
 	@Override
 	public int size() {
 
-		return 1;
+		return this.overlays.size();
 	}
 
 

@@ -1,6 +1,10 @@
 package com.jujunawak.meetme;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.Properties;
 
 import oauth.signpost.basic.DefaultOAuthProvider;
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
@@ -28,6 +32,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.maps.GeoPoint;
@@ -36,6 +41,9 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.OverlayItem;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 
@@ -58,7 +66,7 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 	private long minTime = 15000;
 	private float minDistance = 10;
 
-
+	private static long lastUpdate = 0;
 
 
 	private MyOverlays itemizedoverlay;
@@ -73,10 +81,13 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 	private static CommonsHttpOAuthConsumer consumer;
 	private static DefaultOAuthProvider provider;
 	private static Twitter twitter;
-	private static String  CONSUMER_KEY="0psdnPSbme1wgGWJBE9Bug";
-	private static String CONSUMER_SECRET="0Q0FnooyDOJA0GH9DzoFOOvX1XzlyQjj8lHh2pmyI8";
-	//	private OAuthProvider httpOauthprovider = new DefaultOAuthProvider("https://api.twitter.com/oauth/request_token", "https://api.twitter.com/oauth/access_token", "https://api.twitter.com/oauth/authorize");
-	//	private CommonsHttpOAuthConsumer httpOauthConsumer = new CommonsHttpOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
+	
+	
+	
+	
+	private static String  CONSUMER_KEY;
+	private static String CONSUMER_SECRET;
+
 
 
 
@@ -92,12 +103,26 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 		System.setProperty("http.keepAlive", "false"); 
 		super.onCreate(savedInstanceState);
 
+		Properties props = new Properties();
+		try {
+			props.load(getContext().getAssets().open("key.properties"));
+			CONSUMER_KEY = props.getProperty("consumer_key");
+			CONSUMER_SECRET = props.getProperty("consumer_secret");
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	
+		
 		setContentView(R.layout.mainlayout);
 
 		/** Connection **/
 
 		manageConnection();
-		
+
 		manageUnconnection();
 
 
@@ -129,7 +154,7 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 
 		getDrawable(); 
 		getItemizedoverlay();
-		createMarker(0f, map.getMapCenter());
+		createMarker("Connecting...", map.getMapCenter());
 
 		/* MOngoConnection */
 		getMongoConnection();
@@ -163,6 +188,30 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 					Log.v("Followers size ",""+ids.getIDs().length);
 					Toast.makeText(getContext(), ""+ids.getIDs().length, Toast.LENGTH_SHORT).show();
 
+					DBCollection collUsers = MongoConnection.getInstance().getDb().getCollection("users");
+
+					for(int i=0 ; i < ids.getIDs().length ; i++){
+						DBCursor userC = collUsers.find(new BasicDBObject("twitterId", ids.getIDs()[i]));
+						if(userC.hasNext()){
+							DBObject user = userC.next();
+
+							if(user.containsField("lat") && user.containsField("lon")){
+								int lattitude = (int) (((Integer) user.get("lat")));
+								int longitude = (int) (((Integer) user.get("lon")));
+								GeoPoint point = new GeoPoint(lattitude, longitude);
+								
+								Log.v("geopoint follower", ids.getIDs()[i]+" : "+lattitude+" "+longitude);
+								createMarker((String) user.get("name"), point);
+							}
+
+
+
+
+						}
+					}
+
+
+
 
 				} catch (IllegalStateException e) {
 					// TODO Auto-generated catch block
@@ -172,6 +221,12 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 					Toast.makeText(getContext(), "Not yet connected to Twitter", Toast.LENGTH_LONG).show();
+				} catch (MongoException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (UnknownHostException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}finally{
 					followersButton.setEnabled(true);
 				}
@@ -184,10 +239,10 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 
 
 	private void manageUnconnection() {
-		
+
 		Button disconnect = (Button)findViewById(R.id.unconnection);
 		disconnect.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				Toast.makeText(getContext(), "disconnecting", Toast.LENGTH_SHORT).show();
@@ -198,16 +253,16 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 				editor.remove("user_key");
 				editor.remove("user_secret");
 				editor.commit();
-				
+
 				Button connect = (Button)findViewById(R.id.button1);
 				connect.setEnabled(true);
 				connect.setVisibility(View.VISIBLE);
 				connect.setClickable(true);
-				
+
 			}
 		});
-		
-		
+
+
 	}
 
 
@@ -220,11 +275,11 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 		Log.v("Meet ME RESUME", "RESUME !!!");
 		Log.v("Meet ME RESUME intent", ""+this.getIntent());
 		Log.v("Meet ME RESUME twitter", ""+twitter);
-		
+
 		if(checkForSavedLogin()) return;
-		
+
 		try {  
-		
+
 			if (this.getIntent()!=null && this.getIntent().getData()!=null ){//&& first==true){  
 				Log.v("Intent", this.getIntent()+"");
 				Uri uri = this.getIntent().getData();  
@@ -246,7 +301,7 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 					AccessToken a = new AccessToken(getTwitterConsumer().getToken(), getTwitterConsumer().getTokenSecret());  
 
 					getTwitter().setOAuthAccessToken(a);  
-					
+
 					Log.v("ON RESUME TWITTER ID :", getTwitter().getId()+"");
 					MongoConnection.setTwitterId(getTwitter().getId());
 					SharedPreferences prefs = getContext().getSharedPreferences("your_app_prefs", 0);
@@ -256,6 +311,8 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 					editor.commit();
 
 					
+					setAvatar();
+
 					Button conn = (Button)findViewById(R.id.button1);
 					conn.setClickable(false);
 					conn.setEnabled(false);
@@ -271,6 +328,19 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 		}  
 
 
+	}
+	
+	
+	public void setAvatar() {
+		try{
+		URL avatarURL= new URL(getTwitter().showUser(getTwitter().getId()).getProfileImageURL());
+		ImageView image = (ImageView)findViewById(R.id.imageView1);
+		Drawable avatar = Drawable.createFromStream(avatarURL.openStream(), "avatar");
+		image.setImageDrawable(avatar);
+		}catch (Exception e) {
+			Log.w("avatar", "problem getting avatar "+e.getLocalizedMessage());
+		}
+		
 	}
 
 
@@ -291,13 +361,44 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 			int lng = (int) (location.getLongitude() * 1E6);
 			Log.i("MeetMe Update", lat+" "+lng);
 			GeoPoint point = new GeoPoint(lat, lng);
-
+			
+			
 			mapController.animateTo(point); // mapController.setCenter(point);
 
 			mapController.setZoom(17);
 
 
-			createMarker(location.getSpeed(), point);
+			try {
+				String name = "???";
+				try{
+					name = getTwitter().showUser(MongoConnection.getTwitterId()).getName();
+				}catch (IllegalStateException e) {
+
+				}
+				createMarker(name, point);
+
+				if(System.currentTimeMillis()-lastUpdate > 30000){
+
+				BasicDBObject query = new BasicDBObject().append("twitterId", MongoConnection.getTwitterId());
+				BasicDBObject newDoc = new BasicDBObject();
+				BasicDBObject toUpdate = new BasicDBObject();
+				Log.v("geo update", point+"");
+				toUpdate.append("lat", point.getLatitudeE6()).append("lon", point.getLongitudeE6());
+				newDoc.append("$set", toUpdate);
+				MongoConnection.getInstance().getDb().getCollection("users").update(query, newDoc);
+				lastUpdate = System.currentTimeMillis();
+				}
+				
+			} catch (MongoException e) {
+
+				e.printStackTrace();
+			} catch (UnknownHostException e) {
+
+				e.printStackTrace();
+			}catch (TwitterException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 
 		}
 
@@ -314,9 +415,9 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 		}
 	}
 
-	private void createMarker(float f, GeoPoint p) {
+	private void createMarker(String title, GeoPoint p) {
 		//GeoPoint p = map.getMapCenter();
-		OverlayItem overlayitem = new OverlayItem(p, "Speed : "+f, "s");
+		OverlayItem overlayitem = new OverlayItem(p, title, "s");
 		itemizedoverlay.addOverlay(overlayitem);
 		if (itemizedoverlay != null) {
 			map.getOverlays().add(itemizedoverlay);
@@ -340,7 +441,7 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 			@Override
 			public void onClick(View v) {
 
-				
+
 				LayoutInflater factory = LayoutInflater.from(getContext());
 				final View view = factory.inflate(R.layout.connectionview, null);
 
@@ -411,10 +512,11 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 
 
 		getTwitter().setOAuthAccessToken(a);  
-
+		
+		setAvatar();
 
 		startFirstActivity();
-		
+
 		return true;
 
 	}  
@@ -423,7 +525,7 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 	private void startFirstActivity() {
 
 
-		
+
 		try {
 			final long twitterId = getTwitter().getId();
 			Log.v("TWITTER ID",twitterId+"");
