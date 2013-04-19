@@ -41,7 +41,8 @@
 
         <activity
             android:name="MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name" 
+            android:configChanges="orientation|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -62,7 +63,8 @@
         </activity>
         <activity 
             android:name="FormGenerationActivity"
-            android:label="@string/hello_world">
+            android:label="@string/hello_world"
+            android:configChanges="orientation|keyboardHidden">
             <meta-data 
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.jujunawak.meetme.MainActivity"
