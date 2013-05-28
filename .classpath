@@ -16,5 +16,9 @@
 	<classpathentry kind="lib" path="/Users/jlesbegu/Documents/PERSO/code/MeetMe2/libs/mongo-2.10.1.jar"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="lib" path="/Users/jlesbegu/Documents/PERSO/code/MeetMe2/libs/android-form-generator-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/Users/jlesbegu/Documents/PERSO/code/MeetMe2/libs/mapfish-geo-lib-1.2-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/Users/jlesbegu/Documents/PERSO/code/MeetMe2/libs/jtsio-1.8.jar"/>
+	<classpathentry kind="lib" path="/Users/jlesbegu/Documents/PERSO/code/MeetMe2/libs/jts-1.8.jar"/>
+	<classpathentry kind="lib" path="/Users/jlesbegu/Documents/PERSO/code/MeetMe2/libs/json-20080701.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

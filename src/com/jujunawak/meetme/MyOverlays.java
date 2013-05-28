@@ -35,8 +35,9 @@ public class MyOverlays extends ItemizedOverlay<OverlayItem> {
 
 	@Override
 	protected OverlayItem createItem(int i) {
-
-		return getOverlays().get(i);
+		
+			return getOverlays().get(i);
+		
 	}
 
 	public void removeOverlay(long twitterId){
@@ -45,7 +46,8 @@ public class MyOverlays extends ItemizedOverlay<OverlayItem> {
 	}
 
 	public void addOverlayItem(long twitterId, OverlayItem overlay) {
-		//if(getOverlays().size()==0){
+		
+		/* TODO make a getter for OverlaysTwitterId to avoid this line */
 		getOverlays();
 
 		if(!overlaysTwitterId.values().contains(twitterId)){
@@ -66,7 +68,7 @@ public class MyOverlays extends ItemizedOverlay<OverlayItem> {
 		Log.v("map overlays : ", overlays+"");
 		Log.v("map twitters : ", overlaysTwitterId+"");
 
-		if(overlays.size()>0){
+		if(getOverlays().size()>0){
 			populate();
 		}
 
@@ -99,9 +101,9 @@ public class MyOverlays extends ItemizedOverlay<OverlayItem> {
 			Toast.makeText(context, "sending request ...", Toast.LENGTH_LONG).show();
 		}
 	}
-	
+
 	public void init(){
-		
+
 		overlays = null;
 		overlaysTwitterId = null;
 	}
@@ -123,7 +125,7 @@ public class MyOverlays extends ItemizedOverlay<OverlayItem> {
 
 	@Override
 	public void draw(Canvas canvas, MapView mapView, boolean shadow) {
-		if(!shadow){
+		if(!shadow && (this.overlays.size()>0)){
 			super.draw(canvas, mapView, shadow);
 		}
 	}

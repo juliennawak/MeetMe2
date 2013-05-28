@@ -8,6 +8,13 @@ import java.util.Properties;
 
 import oauth.signpost.basic.DefaultOAuthProvider;
 import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
+
+import org.json.JSONObject;
+import org.mapfish.geo.MfFeature;
+import org.mapfish.geo.MfGeoFactory;
+import org.mapfish.geo.MfGeoJSONReader;
+import org.mapfish.geo.MfGeometry;
+
 import twitter4j.IDs;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -46,6 +53,7 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
 import com.google.android.maps.OverlayItem;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -99,7 +107,17 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 	private static boolean savedLogin = false;
 
 
+	/* Geo Json */
+	private final MfGeoFactory mfFactory = new MfGeoFactory(){
 
+		@Override
+		public MfFeature createFeature(String id, MfGeometry geometry,
+				JSONObject properties) {
+			return new MyFeature(id, geometry, properties);
+		}
+
+	};
+	MfGeoJSONReader reader = new MfGeoJSONReader(mfFactory);
 
 
 	@Override
@@ -130,8 +148,8 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 		/** MAP **/
 		map = (MapView) findViewById(R.id.mapview1);
 		mapController = map.getController();
-		
-		
+
+
 
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
@@ -188,10 +206,10 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 					followersButton.setEnabled(false);
 					Toast.makeText(getContext(), "Look for followers ...", Toast.LENGTH_LONG).show();
 					Log.v("Followers ", "retrieve them ...");
-					IDs ids = getIds();
-					Log.v("Followers size ",""+ids.getIDs().length);
-					Toast.makeText(getContext(), ""+ids.getIDs().length, Toast.LENGTH_SHORT).show();
-					
+					IDs ids = getFollowers();
+					Log.v("Followers size ",""+(ids.getIDs().length-1));
+					Toast.makeText(getContext(), ""+(ids.getIDs().length-1), Toast.LENGTH_SHORT).show();
+
 					FollowersTask t = new FollowersTask();
 					t.start();
 
@@ -204,7 +222,7 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 
 			}
 
-			private IDs getIds() {
+			private IDs getFollowers() {
 				if(ids == null){
 					try {
 						ids = getTwitter().getFollowersIDs(-1);
@@ -222,20 +240,40 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 	protected class FollowersTask extends Thread{
 		@Override
 		public void run() {
-			super.run();
+			Looper.prepare();
 			try{
-				
-				DBCollection collUsers = getMongoConnection().getDb().getCollection("users");
 
-				for(int i=0 ; i < ids.getIDs().length ; i++){
-					DBCursor userC = collUsers.find(new BasicDBObject("twitterId", ids.getIDs()[i]));
+				DBCollection collUsers = getMongoConnection().getDb().getCollection("users");
+				if(ids.getIDs().length==0) return;
+				for(int i=1 ; i < ids.getIDs().length ; i++){
+					Location currentLoc = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+					BasicDBObject geoFilter = new BasicDBObject("$near",new Double[]{currentLoc.getLongitude(), currentLoc.getLatitude()});
+					geoFilter.put("$maxDistance", 50);
+					BasicDBObject queryUser = new BasicDBObject("twitterId", ids.getIDs()[i]).append("geo.coordinates", geoFilter); 
+							
+
+					if(getItemizedoverlay().getOverlays().containsKey(i)) continue;
+					//"["+currentLoc.getLongitude()+", "+currentLoc.getLatitude()+"], $maxDistance  : 100}"));
+					//	"{$near : ["+currentLoc.getLongitude()+", "+currentLoc.getLatitude()+"], $maxDistance  : 100}");
+					Log.v("query", queryUser.toString());
+					DBCursor userC = collUsers.find(queryUser);
 
 					if(userC.hasNext()){
 						DBObject user = userC.next();
 
-						if(user.containsField("lat") && user.containsField("lon")){
-							int lattitude = (int) (((Integer) user.get("lat")));
-							int longitude = (int) (((Integer) user.get("lon")));
+						if(user.containsField("geo")){
+							//							Log.v("geo", user.get("geo").getClass().getName());
+							BasicDBObject geojson = (BasicDBObject) user.get("geo");
+							MfGeometry geoObject = (MfGeometry) reader.decode(geojson.toString());
+							double latmp = geoObject.getInternalGeometry().getCoordinate().y*1E6;
+							double lotmp = geoObject.getInternalGeometry().getCoordinate().x*1E6;
+							Log.v("geo", latmp+" "+lotmp);
+							int lattitude = (int) (((Double) latmp).intValue());
+							int longitude = (int) (((Double) lotmp).intValue());
+							Log.v("geo*1E6", lattitude+" "+longitude);
+
+
+
 							GeoPoint point = new GeoPoint(lattitude, longitude);
 							Log.v("Follower", ""+user.get("name"));
 
@@ -245,18 +283,22 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 
 							Log.v("Follower", marker+"");
 							createMarker((String) user.get("name"), point,  Long.valueOf((user.get("twitterId").toString())), marker);
+							// try to zoom to span all followers	
+							mapController.zoomToSpan(itemizedoverlay.getLatSpanE6(), itemizedoverlay.getLonSpanE6());
 
 						}
 
+					}else{
+						Log.v("followers", "no user found or too far");
 					}
 				}
 				Toast.makeText(getContext(), "Followers ok, see them now ...", Toast.LENGTH_LONG).show();
-				
-				
+
+
 			}catch (Exception e) {
 				e.printStackTrace();
 			}
-
+			Looper.loop();
 		}
 	}
 
@@ -268,7 +310,7 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 		InputStream input = connection.getInputStream();
 
 		x = BitmapFactory.decodeStream(input);
-		
+
 		BitmapDrawable xx = new BitmapDrawable(x);
 
 		//xx.setBounds(new Rect(-x.getWidth()/2, -x.getHeight()/2, x.getWidth()/2, x.getHeight()/2));
@@ -481,8 +523,6 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 							getTwitterConsumer();
 							getTwitterProvider();
 
-
-
 							String authUrl = getTwitterProvider().retrieveRequestToken(getTwitterConsumer(), CALLBACK_URL);
 
 
@@ -683,6 +723,7 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 
 		@Override
 		public void onLocationChanged(Location location) {
+			if(location == null) return;
 
 			int lat = (int) (location.getLatitude() * 1E6); 
 			int lng = (int) (location.getLongitude() * 1E6);
@@ -700,11 +741,18 @@ public class MainActivity extends MapActivity  implements GpsStatus.Listener {
 
 				if(System.currentTimeMillis()-lastUpdate > 60000){
 
+
 					BasicDBObject query = new BasicDBObject().append("twitterId", MongoConnection.getTwitterId());
 					BasicDBObject newDoc = new BasicDBObject();
 					BasicDBObject toUpdate = new BasicDBObject();
 					Log.v("geo update", point+"");
-					toUpdate.append("lat", point.getLatitudeE6()).append("lon", point.getLongitudeE6());
+
+					BasicDBList coord = new BasicDBList();
+					coord.put("0", location.getLongitude());
+					coord.put("1", location.getLatitude());
+					BasicDBObject geoValue = new BasicDBObject("type", "Point").append("coordinates", coord);//"["+point.getLongitudeE6()+","+point.getLatitudeE6()+"]");
+					toUpdate.append("geo", geoValue);
+					//append("lat", point.getLatitudeE6()).append("lon", point.getLongitudeE6());
 					newDoc.append("$set", toUpdate);
 					getMongoConnection().getDb().getCollection("users").update(query, newDoc);
 					lastUpdate = System.currentTimeMillis();
